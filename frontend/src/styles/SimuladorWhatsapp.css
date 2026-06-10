@@ -1,0 +1,126 @@
+.whatsapp-mock-container {
+  width: 100%;
+  max-width: 360px;
+  height: 500px;
+  background: #0b141a;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid #222e35;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.wa-header {
+  background: #202c33;
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #2f3b43;
+}
+
+.wa-avatar {
+  width: 38px;
+  height: 38px;
+  background: #00a884;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.wa-status-info h4 {
+  margin: 0;
+  color: #e9edef;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.wa-status-info span {
+  color: #8696a0;
+  font-size: 11px;
+}
+
+.wa-chat-body {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png'); /* Fondo clásico WhatsApp */
+  background-blend-mode: overlay;
+  background-color: #0b141a;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.wa-msg-row {
+  display: flex;
+  width: 100%;
+}
+
+.wa-msg-row.bot { justify-content: flex-start; }
+.wa-msg-row.user { justify-content: flex-end; }
+
+.wa-msg-bubble {
+  max-width: 85%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  position: relative;
+  font-size: 13px;
+  color: #e9edef;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.bot .wa-msg-bubble { background: #202c33; border-top-left-radius: 0; }
+.user .wa-msg-bubble { background: #005c4b; border-top-right-radius: 0; }
+
+.wa-msg-bubble p { margin: 0; padding-bottom: 4px; line-height: 1.4; }
+
+.wa-time {
+  display: block;
+  text-align: right;
+  font-size: 9px;
+  color: #8696a0;
+}
+
+.writing {
+  color: #00a884;
+  font-style: italic;
+  background: #202c33 !important;
+}
+
+.wa-footer {
+  padding: 10px;
+  background: #202c33;
+  display: flex;
+  gap: 8px;
+}
+
+.wa-footer input {
+  flex: 1;
+  background: #2a3942;
+  border: none;
+  padding: 9px 15px;
+  border-radius: 8px;
+  color: #e9edef;
+  font-size: 13px;
+}
+
+.wa-footer input:focus { outline: none; }
+
+.wa-footer button {
+  background: #00a884;
+  border: none;
+  color: white;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}

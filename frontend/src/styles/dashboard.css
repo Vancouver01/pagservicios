@@ -1,0 +1,70 @@
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(300px,1fr));
+  gap: 25px;
+  margin-top: 30px;
+}
+
+.config-card {
+  background: #1e293b;
+  padding: 25px;
+  border-radius: 18px;
+  border: 1px solid #334155;
+}
+
+.config-card button {
+  margin-top: 15px;
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(90deg,#00d4ff,#2563eb);
+  color: white;
+  cursor: pointer;
+}
+
+.historial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px,1fr));
+  gap: 25px;
+  margin-top: 30px;
+}
+
+.historial-card {
+  background: #1e293b;
+  padding: 25px;
+  border-radius: 18px;
+  border: 1px solid #334155;
+  transition: 0.3s;
+}
+
+.historial-card:hover {
+  transform: translateY(-5px);
+  border-color: #00d4ff;
+}
+
+.historial-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.estado {
+  background: rgba(0,212,255,0.15);
+  color: #00d4ff;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.btn-ver {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(90deg,#00d4ff,#2563eb);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}

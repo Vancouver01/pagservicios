@@ -1,0 +1,129 @@
+/* ==========================================================================
+   📱 EXTENSIÓN PREMIUM: INTERFAZ DE CAPTURA ESTILO WHATSAPP (SIDPOL)
+   ========================================================================== */
+
+/* Contenedor principal que envuelve el Chatbot */
+.chatbot-wrapper.premium {
+  background: #111b21 !important; /* Fondo oscuro integrado con el tema de la app */
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cuerpo del chat donde caen los mensajes */
+.chatbot-body {
+  background-color: #0b141a !important; /* Tono oficial de WhatsApp Dark Mode */
+  background-image: radial-gradient(rgba(6, 182, 212, 0.05) 2px, transparent 0);
+  background-size: 24px 24px;
+  padding: 20px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Modificación de burbujas para anular estilos globales anteriores */
+.chatbot-body .chat-bubble {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100%;
+}
+
+/* Estilos de las burbujas internas de texto */
+.chatbot-body p {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.5;
+  font-size: 14.5px;
+  max-width: 75% !important;
+  position: relative;
+}
+
+/* Burbuja enviada por el Ciudadano (Derecha) */
+.chat-bubble.user p {
+  background: #005c4b !important; /* Verde WhatsApp oscuro */
+  color: #e9edef !important;
+  border-radius: 8px 0px 8px 8px !important;
+}
+
+/* Burbuja enviada por la IA Policial (Izquierda) */
+.chat-bubble.ia p {
+  background: #202c33 !important; /* Gris WhatsApp oscuro */
+  color: #e9edef !important;
+  border-radius: 0px 8px 8px 8px !important;
+  border-left: 3px solid #06b6d4; /* Detalle cyan de SIDPOL */
+}
+
+/* Caja de texto del footer del Chat */
+.chatbot-footer {
+  background: #1f2c34 !important; /* Barra de abajo oficial */
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 12px 16px !important;
+  align-items: center;
+}
+
+/* Input donde escribe el ciudadano */
+.chatbot-footer input[type="text"] {
+  background: #2a3942 !important;
+  border: 1px solid rgba(6, 182, 212, 0.1) !important;
+  color: #fff !important;
+  padding: 12px 18px !important;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.chatbot-footer input[type="text"]:focus {
+  border-color: #06b6d4 !important;
+  box-shadow: 0 0 8px rgba(6, 182, 212, 0.2);
+}
+
+/* Botón enviar de WhatsApp */
+.chatbot-footer .btn-send-premium {
+  background: #00a884 !important; /* Botón verde WhatsApp vibrante */
+  color: #ffffff !important;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: background 0.2s ease;
+}
+
+.chatbot-footer .btn-send-premium:hover {
+  background: #008f72 !important;
+  box-shadow: 0 0 12px rgba(0, 168, 132, 0.4);
+}
+
+/* --- 📋 CAJA DE LINEA DE TIEMPO Y DESCARGA DE ACTA --- */
+.tracking-timeline-box {
+  background: #182229 !important;
+  border: 1px solid rgba(6, 182, 212, 0.2) !important;
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 15px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tracking-timeline-box h5 {
+  color: #06b6d4 !important; /* Título en cyan de tu paleta */
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+/* Botón de descarga PDF de Acta */
+.btn-download-pdf-premium {
+  background: linear-gradient(135deg, #075e54 0%, #00a884 100%) !important;
+  border: none !important;
+  color: white !important;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 12px;
+  transition: opacity 0.2s;
+}
+
+.btn-download-pdf-premium:hover {
+  opacity: 0.9;
+}
