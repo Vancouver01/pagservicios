@@ -1,14 +1,17 @@
 const mysql = require('mysql2');
 
 // Pool de conexiones orientado a alta disponibilidad
-const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: 'lolcrackk007',
-  database: 'sidpol_ia_db',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
+const pool = mysql.createPool(
+  process.env.MYSQLURL || process.env.DATABASE_URL || {
+    host: process.env.MYSQLHOST || 'localhost',
+    user: process.env.MYSQLUSER || 'root',
+    password: process.env.MYSQLPASSWORD || 'lolcrackk007',
+    database: process.env.MYSQLDATABASE || 'sidpol_ia_db',
+    port: process.env.MYSQLPORT || 3306,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+  }
+);
 
-module.exports = pool.promise();
+export default pool.promise();

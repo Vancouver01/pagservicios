@@ -160,7 +160,7 @@ useEffect(() => {
   const eliminarRegistro = async (id) => {
     if (window.confirm(`¿Está seguro de eliminar permanentemente el expediente ${id} de la base de datos relacional?`)) {
       try {
-        const response = await fetch(`http://localhost:5000/api/denuncias/${id}`, {
+        const response = await fetch(`https://pagservicios-production.up.railway.app/api/denuncias/${id}`, {
           method: "DELETE"
         });
         if (response.ok) {
