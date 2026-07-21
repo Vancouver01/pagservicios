@@ -1,10 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
 // Importamos la conexión optimizada desde conexion.js
 import db from './conexion.js';
-
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const app = express();
 
 // ✅ CORRECCIÓN DE PUERTO: Railway inyecta process.env.PORT automáticamente
@@ -153,6 +156,18 @@ app.delete('/api/denuncias/:id', async (req, res) => {
     console.error('Error al eliminar de MySQL:', error);
     res.status(500).json({ error: 'Fallo al eliminar el registro.' });
   }
+});
+
+// ==========================================
+// 🌐 SERVIR EL FRONTEND COMPLETO
+// ==========================================
+// Cualquier ruta que no sea de la API entregará la interfaz gráfica
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 App completa (Frontend + Backend) corriendo en el puerto ${PORT}`);
 });
 
 // ==========================================
