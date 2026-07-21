@@ -20,16 +20,6 @@ app.use(express.json());
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 // ==========================================
-// 📡 RUTA RAÍZ (HEALTH CHECK)
-// ==========================================
-app.get('/', (req, res) => {
-  res.json({
-    mensaje: '🚀 Backend de DenunciaSegura / SIDPOL está activo.',
-    estado: 'Online'
-  });
-});
-
-// ==========================================
 // 📡 ENDPOINTS DEL CRUD TRANSACCIONAL
 // ==========================================
 
@@ -158,15 +148,12 @@ app.delete('/api/denuncias/:id', async (req, res) => {
   }
 });
 
+
 // ==========================================
-// 🌐 CONFIGURACIÓN DEL FRONTEND (REACT)
+// 🌐 CONFIGURACIÓN DEL FRONTEND
 // ==========================================
 
-// Ruta donde se encuentra el build de React
-const buildPath = path.resolve(process.cwd(), "frontend/build");
 
-// Servir archivos estáticos del frontend
-app.use(express.static(buildPath));
 
 // ==========================================
 // 🤖 ENDPOINT DE LA CAPA DE INTEGRACIÓN DE IA
@@ -260,15 +247,21 @@ Si describe un delito, clasifícalo y completa todos los campos.`,
 
   }
 });
+const buildPath = path.resolve(process.cwd(), "frontend/build");
 
-// ==========================================
-// 🌐 RUTA COMODÍN (REACT)
-// ==========================================
+app.use(express.static(buildPath));
 
 app.get("*", (req, res) => {
-  res.sendFile(path.join(buildPath, "index.html"));
-});
 
+    if (req.originalUrl.startsWith("/api")) {
+        return res.status(404).json({
+            error: "Endpoint no encontrado"
+        });
+    }
+
+    res.sendFile(path.join(buildPath, "index.html"));
+
+});
 // ==========================================
 // 🚀 INICIAR SERVIDOR
 // ==========================================
@@ -276,7 +269,7 @@ app.get("*", (req, res) => {
 app.listen(PORT, "0.0.0.0", () => {
 
   console.log("====================================");
-  console.log("🚀 DenunciaSegura iniciado");
+  console.log("🚀 Version nueva");
   console.log(`🌍 Puerto: ${PORT}`);
   console.log(`📂 Build React: ${buildPath}`);
   console.log("====================================");
