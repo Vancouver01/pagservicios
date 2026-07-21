@@ -43,7 +43,7 @@ function ChatBotIA({ onDenunciaCompletada }) {
         if (esAfirmativo) {
           const hashSimulado = "sha256_gemini_" + Math.random().toString(36).substring(2, 7);
 
-          const responseDb = await fetch("http://localhost:5000/api/denuncias", {
+          const responseDb = await fetch("https://pagservicios-production.up.railway.app/api/denuncias", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -96,7 +96,7 @@ function ChatBotIA({ onDenunciaCompletada }) {
       // PASO 1: FASE DE CONVERSACIÓN Y ANÁLISIS DE RELATO (CON GEMINI REAL)
       // ====================================================================
       else if (paso === "conversacion") {
-        const response = await fetch("http://localhost:5000/api/ia/analizar", {
+        const response = await fetch("https://pagservicios-production.up.railway.app/api/ia/analizar", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ relato: textoUsuario })

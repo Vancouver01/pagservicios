@@ -44,7 +44,7 @@ useEffect(() => {
   const cargarDatosDesdeBD = async () => {
     try {
       // Revisa que el puerto (5000) coincida con el que configuraron en el backend
-      const response = await fetch("http://localhost:5000/api/denuncias");
+   const response = await fetch("https://pagservicios-production.up.railway.app/api/denuncias");
       if (response.ok) {
         const datosReales = await response.json();
         setTablaDenuncias(datosReales); // Sincroniza la tabla y el mapa al instante
@@ -122,7 +122,7 @@ useEffect(() => {
     };
 
     try {
-      const response = await fetch("http://localhost:5000/api/denuncias", {
+      const response = await fetch("https://pagservicios-production.up.railway.app/api/denuncias", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(nuevoRegistro)
@@ -138,7 +138,7 @@ useEffect(() => {
   // UPDATE: Guardar cambios editados por el operador PNP
   const actualizarRegistro = async (id, camposActualizados) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/denuncias/${id}`, {
+      const response = await fetch(`https://pagservicios-production.up.railway.app/api/denuncias/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
