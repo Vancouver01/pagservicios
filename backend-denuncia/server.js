@@ -225,6 +225,6 @@ app.post('/api/ia/analizar', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor de DenunciaSegura corriendo en http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Servidor de DenunciaSegura corriendo en el puerto ${PORT}`);
 });
