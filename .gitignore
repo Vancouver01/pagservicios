@@ -1,0 +1,24 @@
+# =========================
+# React / Node.js (Frontend)
+# =========================
+node_modules/
+build/
+.env
+
+# =========================
+# Spring Boot / Java (Backend)
+# =========================
+target/
+*.class
+.mvn/
+!mvnw
+!mvnw.cmd
+.env
+
+# =========================
+# Entornos e IDEs
+# =========================
+.idea/
+.vscode/
+*.log
+.DS_Store
