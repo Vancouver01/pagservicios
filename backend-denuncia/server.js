@@ -230,7 +230,7 @@ app.post('/api/ia/analizar', async (req, res) => {
   }
 });
 
-// ✅ CORRECCIÓN CRÍTICA DE BINDING PARA RAILWAY
+// CORRECCIÓN CRÍTICA DE BINDING PARA RAILWAY
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Servidor e interfaz escuchando en el puerto ${PORT}`);
 });
