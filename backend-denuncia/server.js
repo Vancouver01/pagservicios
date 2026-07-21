@@ -11,7 +11,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 
 // ✅ CORRECCIÓN DE PUERTO: Railway inyecta process.env.PORT automáticamente
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -232,5 +232,5 @@ app.post('/api/ia/analizar', async (req, res) => {
 
 // ✅ CORRECCIÓN CRÍTICA DE BINDING PARA RAILWAY
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Servidor de DenunciaSegura corriendo en el puerto ${PORT}`);
+  console.log(`🚀 Servidor e interfaz escuchando en el puerto ${PORT}`);
 });
