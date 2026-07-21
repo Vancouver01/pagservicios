@@ -24,140 +24,131 @@ function ChatBotIA({ onDenunciaCompletada }) {
   }, [messages, loading]);
 
   const enviarMensaje = async () => {
-    if (!input.trim() || loading) return;
+  if (!input.trim() || loading) return;
 
-    const textoUsuario = input.trim();
-    setMessages((prev) => [...prev, { id: Date.now(), sender: "user", text: textoUsuario }]);
-    setInput("");
-    setLoading(true);
+  const textoUsuario = input.trim();
+  setMessages((prev) => [...prev, { id: Date.now(), sender: "user", text: textoUsuario }]);
+  setInput("");
+  setLoading(true);
 
-    try {
-      // ====================================================================
-      // PASO 2: FASE DE CONFIRMACIÓN LOCAL (BYPASS DE IA HACIA MYSQL)
-      // ====================================================================
-      if (paso === "confirmacion") {
-        const respuestaNormalizada = textoUsuario.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const afirmativas = ["si", "dale", "confirmo", "hagamoslo", "esta bien", "procede", "ya", "bueno", "ok", "listo"];
-        const esAfirmativo = afirmativas.some(palabra => respuestaNormalizada.includes(palabra));
+  try {
+    // ------------------------------------------------------------------
+    // FASE 2: CONFIRMACIÓN Y REGISTRO EN BASE DE DATOS
+    // ------------------------------------------------------------------
+    if (paso === "confirmacion") {
+      const respuestaNormalizada = textoUsuario.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const afirmativas = ["si", "dale", "confirmo", "hagamoslo", "esta bien", "procede", "ya", "bueno", "ok", "listo"];
+      const esAfirmativo = afirmativas.some((palabra) => respuestaNormalizada.includes(palabra));
 
-        if (esAfirmativo) {
-          const hashSimulado = "sha256_gemini_" + Math.random().toString(36).substring(2, 7);
+      if (esAfirmativo && datosTemporales) {
+        const hashSimulado = "SHA256-GEMINI-" + Math.random().toString(36).substring(2, 9).toUpperCase();
 
-          const responseDb = await fetch("https://pagservicios-production.up.railway.app/api/denuncias", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              id_expediente: datosTemporales.id_expediente,
-              delito: datosTemporales.delito,
-              distrito: datosTemporales.distrito,
-              urgencia: datosTemporales.urgencia,
-              latitud: datosTemporales.latitud,
-              longitud: datosTemporales.longitud,
-              hash: hashSimulado,
-              coincidencia: datosTemporales.coincidencia,
-              recomendacion: datosTemporales.recomendacion
-            })
-          });
-
-          if (responseDb.ok) {
-            setMessages((prev) => [
-              ...prev, 
-              { 
-                id: Date.now() + 1,
-                sender: "ia", 
-                text: `✅ *Expediente registrado de manera exitosa en SIDPOL.*\n\n• *N° Expediente:* #${datosTemporales.id_expediente}\n\nLos datos estructurales han sido inyectados de forma síncrona en la base de datos relacional MySQL. El panel analítico y el mapa táctico del oficial PNP han integrado el reporte.` 
-              }
-            ]);
-            if (onDenunciaCompletada) onDenunciaCompletada(datosTemporales);
-            setPdfGenerado(true);
-          } else {
-            throw new Error("Fallo en la inserción transaccional de MySQL.");
-          }
-        } else {
-          setMessages((prev) => [
-            ...prev, 
-            { 
-              id: Date.now() + 1,
-              sender: "ia", 
-              text: "❌ Registro cancelado. Los metadatos de triaje han sido purgados del búfer de sesión por políticas de confidencialidad." 
-            }
-          ]);
-          setPdfGenerado(false);
-        }
-
-        setTimeout(() => {
-          setPaso("conversacion");
-          setDatosTemporales(null);
-          setLoading(false);
-        }, 50);
-      } 
-      
-      // ====================================================================
-      // PASO 1: FASE DE CONVERSACIÓN Y ANÁLISIS DE RELATO (CON GEMINI REAL)
-      // ====================================================================
-      else if (paso === "conversacion") {
-        const response = await fetch("https://pagservicios-production.up.railway.app/api/ia/analizar", {
+        const responseDb = await fetch("https://pagservicios-production.up.railway.app/api/denuncias", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ relato: textoUsuario })
+          body: JSON.stringify({
+            id_expediente: datosTemporales.id_expediente,
+            delito: datosTemporales.delito,
+            distrito: datosTemporales.distrito,
+            urgencia: datosTemporales.urgencia,
+            latitud: datosTemporales.latitud,
+            longitud: datosTemporales.longitud,
+            hash: hashSimulado,
+            coincidencia: datosTemporales.coincidencia,
+            recomendacion: datosTemporales.recomendacion
+          })
         });
 
-        if (response.ok) {
-          const data = await response.json();
-          
-          if (data.es_denuncia_valida) {
-            setDatosTemporales({
-              id_expediente: `EP-${Math.floor(100000 + Math.random() * 900000)}`,
-              delito: data.tipo,
-              distrito: data.zona,
-              urgencia: data.urgencia,
-              coincidencia: data.coincidencia,
-              recomendacion: data.recomendacion,
-              latitud: null, 
-              longitud: null
-            });
-
-            setTimeout(() => {
-              setMessages((prev) => [
-                ...prev, 
-                { 
-                  id: Date.now() + 1,
-                  sender: "ia", 
-                  text: `🧠 [Asistente Virtual - Triaje Terminado]:\n\n${data.recomendacion}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📋 METADATOS CLASIFICADOS EN CALIENTE:\n• Delito Inferido: ${data.tipo}\n• Jurisdicción: ${data.zona}\n• Alerta de Riesgo: ${data.urgencia}\n• Confianza: ${data.coincidencia}%\n\n¿Desea registrar formalmente este expediente de manera síncrona en el panel analítico de la PNP?\n(Responda únicamente con un "SI" para confirmar o "NO" para cancelar)` 
-                }
-              ]);
-              setPaso("confirmacion");
-              setLoading(false);
-            }, 50);
-
-          } else {
-            setTimeout(() => {
-              setMessages((prev) => [
-                ...prev, 
-                { 
-                  id: Date.now() + 1, 
-                  sender: "ia", 
-                  text: `🧠 [Asistente Virtual]:\n\n${data.recomendacion}` 
-                }
-              ]);
-              setLoading(false);
-            }, 50);
-          }
+        if (responseDb.ok) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              id: Date.now() + 1,
+              sender: "ia",
+              text: `✅ *Expediente registrado de manera exitosa en SIDPOL.*\n\n• *N° Expediente:* #${datosTemporales.id_expediente}\n\nLos datos han sido registrados correctamente en la base de datos MySQL.`
+            }
+          ]);
+          if (onDenunciaCompletada) onDenunciaCompletada(datosTemporales);
+          setPdfGenerado(true);
         } else {
-          throw new Error("Error en respuesta de la API central.");
+          throw new Error("Fallo en la inserción transaccional de MySQL.");
         }
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            sender: "ia",
+            text: "❌ Registro cancelado. Los metadatos de triaje han sido purgados de la sesión."
+          }
+        ]);
+        setPdfGenerado(false);
       }
 
-    } catch (error) {
-      console.error("Error crítico en el flujo de control:", error);
-      setTimeout(() => {
-        setMessages((prev) => [...prev, { id: Date.now() + 1, sender: "ia", text: "⚠️ Error interno de comunicación con los servicios centrales de SIDPOL." }]);
-        setPaso("conversacion");
-        setDatosTemporales(null);
-        setLoading(false);
-      }, 50);
+      setPaso("conversacion");
+      setDatosTemporales(null);
+      setLoading(false);
+      return; // Importante: salir aquí para evitar ejecutar la fase de conversación
     }
-  };
+
+    // ------------------------------------------------------------------
+    // FASE 1: CONVERSACIÓN CON GEMINI LLM
+    // ------------------------------------------------------------------
+    const response = await fetch("https://pagservicios-production.up.railway.app/api/ia/analizar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ relato: textoUsuario })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+
+      if (data.es_denuncia_valida) {
+        setDatosTemporales({
+          id_expediente: `EP-${Math.floor(100000 + Math.random() * 900000)}`,
+          delito: data.tipo,
+          distrito: data.zona,
+          urgencia: data.urgencia,
+          coincidencia: data.coincidencia,
+          recomendacion: data.recomendacion,
+          latitud: null,
+          longitud: null
+        });
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            sender: "ia",
+            text: `🧠 [Asistente Virtual - Triaje Terminado]:\n\n${data.recomendacion}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📋 METADATOS CLASIFICADOS EN CALIENTE:\n• Delito Inferido: ${data.tipo}\n• Jurisdicción: ${data.zona}\n• Alerta de Riesgo: ${data.urgencia}\n• Confianza: ${data.coincidencia}%\n\n¿Desea registrar formalmente este expediente de manera síncrona en el panel analítico de la PNP?\n(Responda únicamente con un "SI" para confirmar o "NO" para cancelar)`
+          }
+        ]);
+        setPaso("confirmacion");
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            sender: "ia",
+            text: `🧠 [Asistente Virtual]:\n\n${data.recomendacion}`
+          }
+        ]);
+      }
+    } else {
+      throw new Error("Error en respuesta de la API central.");
+    }
+  } catch (error) {
+    console.error("Error en el flujo de control:", error);
+    setMessages((prev) => [
+      ...prev,
+      { id: Date.now() + 1, sender: "ia", text: "⚠️ Error de comunicación con los servicios centrales de SIDPOL." }
+    ]);
+    setPaso("conversacion");
+    setDatosTemporales(null);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const descargarPdfSimulado = () => {
     alert(`📄 Generando y descargando: COMPROBANTE_DENUNCIA_SIDPOL.pdf\n\nIncluye firma digital institucional y HASH criptográfico.`);

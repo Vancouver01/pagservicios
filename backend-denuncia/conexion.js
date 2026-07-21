@@ -1,8 +1,14 @@
-const mysql = require('mysql2');
+import mysql from 'mysql2';
 
-// Pool de conexiones orientado a alta disponibilidad
+// Detectar cualquier variable de conexión de Railway
+const connectionString = 
+  process.env.MYSQLURL || 
+  process.env.MYSQL_URL || 
+  process.env.DATABASE_URL;
+
+// Pool de conexiones adaptado a producción / local
 const pool = mysql.createPool(
-  process.env.MYSQL_URL || process.env.DATABASE_URL || {
+  connectionString ? connectionString : {
     host: process.env.MYSQLHOST || 'localhost',
     user: process.env.MYSQLUSER || 'root',
     password: process.env.MYSQLPASSWORD || 'lolcrackk007',
@@ -14,4 +20,16 @@ const pool = mysql.createPool(
   }
 );
 
-export default pool.promise();
+// Prueba silenciosa de conexión para depuración
+const db = pool.promise();
+
+db.getConnection()
+  .then((conn) => {
+    console.log('✅ Conexión exitosa a la base de datos MySQL.');
+    conn.release();
+  })
+  .catch((err) => {
+    console.error('⚠️ Error al conectar con MySQL:', err.message);
+  });
+
+export default db;

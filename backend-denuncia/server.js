@@ -1,9 +1,9 @@
 import express from 'express';
 import cors from 'cors';
-import mysql from 'mysql2';
 import 'dotenv/config';
-// Importamos el cliente oficial moderno de Google Gen AI
 import { GoogleGenAI } from '@google/genai';
+// Importamos la conexión optimizada desde conexion.js
+import db from './conexion.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -15,34 +15,22 @@ app.use(express.json());
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 // ==========================================
-// 🗄️ CONFIGURACIÓN DE LA BASE DE DATOS (POOL)
+// 📡 RUTA RAÍZ (HEALTH CHECK)
 // ==========================================
-const pool = mysql.createPool(
-  process.env.MYSQLURL || process.env.DATABASE_URL || {
-    host: process.env.MYSQLHOST || 'localhost',
-    user: process.env.MYSQLUSER || 'root',
-    password: process.env.MYSQLPASSWORD || 'lolcrackk007',
-    database: process.env.MYSQLDATABASE || 'sidpol_ia_db',
-    port: process.env.MYSQLPORT || 3306,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-  }
-);
-
-const db = pool.promise();
-
 app.get('/', (req, res) => {
-  res.send('🚀 Backend de DenunciaSegura / SIDPOL está activo.');
+  res.json({
+    mensaje: '🚀 Backend de DenunciaSegura / SIDPOL está activo.',
+    estado: 'Online'
+  });
 });
+
 // ==========================================
 // 📡 ENDPOINTS DEL CRUD TRANSACCIONAL
 // ==========================================
 
-// 1. GET: Retorna los expedientes formateando alias de compatibilidad automática para React
+// 1. GET: Retorna los expedientes
 app.get('/api/denuncias', async (req, res) => {
   try {
-    // Agregamos alias (AS tipo, AS zona) para que tu React lea ambas nomenclaturas sin romperse
     const [rows] = await db.query(`
       SELECT 
         id_expediente,
@@ -80,7 +68,7 @@ app.post('/api/denuncias', async (req, res) => {
       [dni || '72145632', 'JEAN POOL JAMARILLO QUISPE']
     );
 
-    // 2. Blindaje de variables obligatorias para evitar ER_BAD_NULL_ERROR
+    // 2. Blindaje de variables obligatorias
     const delitoFinal = delito || 'Delito Genérico / Hurto';
     const distritoFinal = distrito || 'LIMA';
     const urgenciaFinal = urgencia || 'MEDIA';
@@ -90,7 +78,7 @@ app.post('/api/denuncias', async (req, res) => {
     const dniFinal = dni || '72145632';
     const hashFinal = hash || 'sha256_default_' + Math.random().toString(36).substring(2, 7);
 
-    // 3. Asignación automática de coordenadas según el distrito si llegan nulas
+    // 3. Asignación automática de coordenadas
     let latFinal = latitud ? parseFloat(latitud) : null;
     let lonFinal = longitud ? parseFloat(longitud) : null;
     
@@ -107,11 +95,11 @@ app.post('/api/denuncias', async (req, res) => {
       } else if (d.includes("surco")) {
         latFinal = -12.1450; lonFinal = -76.9950;
       } else {
-        latFinal = -12.0464; lonFinal = -77.0428; // Coordenada por defecto: Centro de Lima
+        latFinal = -12.0464; lonFinal = -77.0428;
       }
     }
 
-    // 4. Inserción protegida en MySQL
+    // 4. Inserción en MySQL
     await db.query(
       `INSERT INTO denuncias 
        (id_expediente, dni_ciudadano, delito_clasificado, distrito, urgencia, coincidencia, recomendacion, latitud, longitud, firma_sha256) 
@@ -153,7 +141,7 @@ app.put('/api/denuncias/:id', async (req, res) => {
   }
 });
 
-// 4. DELETE: Purgado criptográfico/físico
+// 4. DELETE: Purgado de registro
 app.delete('/api/denuncias/:id', async (req, res) => {
   const { id } = req.params;
   try {

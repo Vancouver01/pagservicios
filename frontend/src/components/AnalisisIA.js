@@ -11,11 +11,14 @@ function AnalisisIA({ datosIa }) {
     );
   }
 
-  // 🧠 SOPORTE HÍBRIDO POLIMÓRFICO: Evaluamos tanto las claves de la base de datos como las del chatbot
+  // 🧠 SOPORTE HÍBRIDO POLIMÓRFICO
   const tipo = datosIa.delito_clasificado || datosIa.delito || datosIa.tipo || "No tipificado";
   const zona = datosIa.distrito || datosIa.zona || "No especificado";
   const urgencia = datosIa.urgencia || "BAJA";
-  const coincidencia = datosIa.coincidencia !== undefined ? datosIa.coincidencia : 0;
+  const urgenciaClase = urgencia.toString().toLowerCase().trim();
+  
+  // Normalización del porcentaje
+  const coincidencia = Math.min(100, Math.max(0, Math.round(Number(datosIa.coincidencia) || 0)));
   const recomendacion = datosIa.recomendacion || "Central de despacho en espera de asignación técnica.";
 
   return (
@@ -30,7 +33,7 @@ function AnalisisIA({ datosIa }) {
       
       <div className="ia-body">
         {/* Banner de Urgencia */}
-        <div className={`urgency-banner-premium ${urgencia.toLowerCase()}`}>
+        <div className={`urgency-banner-premium ${urgenciaClase}`}>
           <div className="banner-glow"></div>
           <span className="label">NIVEL DE RIESGO DE SUCESO:</span>
           <strong className="value">{urgencia}</strong>

@@ -110,16 +110,16 @@ useEffect(() => {
     const distritoDetectado = nuevaDenunciaData.zona || "Los Olivos";
     const coords = coordenadasLima[distritoDetectado] || { lat: -12.0464, lng: -77.0428 };
 
-    const nuevoRegistro = {
-      id_expediente: `EXP-2026-0${Math.floor(Math.random() * 90) + 10}`,
-      dni: sesion.dni,
-      delito: nuevaDenunciaData.tipo,
-      distrito: distritoDetectado,
-      urgencia: nuevaDenunciaData.urgencia || "MEDIA",
-      latitud: coords.lat,
-      longitud: coords.lng,
-      hash: "SHA256-" + Math.random().toString(16).substr(2, 8)
-    };
+   const nuevoRegistro = {
+  id_expediente: `EXP-2026-0${Math.floor(Math.random() * 90) + 10}`,
+  dni: sesion.dni,
+  delito: nuevaDenunciaData.tipo,
+  distrito: distritoDetectado,
+  urgencia: nuevaDenunciaData.urgencia || "MEDIA",
+  latitud: coords.lat,
+  longitud: coords.lng,
+  hash: "SHA256-" + Math.random().toString(16).substr(2, 8)
+};
 
     try {
       const response = await fetch("https://pagservicios-production.up.railway.app/api/denuncias", {
@@ -332,10 +332,10 @@ useEffect(() => {
               <tbody>
   {tablaDenuncias.map((caso, index) => (
     <tr key={index}>
-      <td className="bold-cyan">{caso.id_expediente}</td>
-      <td>{caso.dni_ciudadano || "72145632"}</td>
-      <td><span className="table-delito-tag">{caso.delito_clasificado}</span></td>
-      <td>{caso.distrito}</td>
+    <td>{caso.id_expediente || caso.id}</td>
+<td>{caso.dni_ciudadano || caso.dni || "72145632"}</td>
+<td><span className="table-delito-tag">{caso.delito_clasificado || caso.delito || caso.tipo}</span></td>
+<td>{caso.distrito || caso.zona}</td>
       <td>
         <span className={`status-badge ${(caso.estado_despacho || "Pendiente").toLowerCase().replace(/ /g, "-")}`}>
           {caso.estado_despacho || "Pendiente PNP"}
