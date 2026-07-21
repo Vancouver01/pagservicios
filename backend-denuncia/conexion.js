@@ -2,7 +2,7 @@ const mysql = require('mysql2');
 
 // Pool de conexiones orientado a alta disponibilidad
 const pool = mysql.createPool(
-  process.env.MYSQLURL || process.env.DATABASE_URL || {
+  process.env.MYSQL_URL || process.env.DATABASE_URL || {
     host: process.env.MYSQLHOST || 'localhost',
     user: process.env.MYSQLUSER || 'root',
     password: process.env.MYSQLPASSWORD || 'lolcrackk007',
