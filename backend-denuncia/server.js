@@ -6,7 +6,7 @@ import 'dotenv/config';
 import { GoogleGenAI } from '@google/genai';
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
@@ -17,18 +17,24 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 // ==========================================
 // 🗄️ CONFIGURACIÓN DE LA BASE DE DATOS (POOL)
 // ==========================================
-const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: 'lolcrackk007', 
-  database: 'sidpol_ia_db',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-});
+const pool = mysql.createPool(
+  process.env.MYSQLURL || process.env.DATABASE_URL || {
+    host: process.env.MYSQLHOST || 'localhost',
+    user: process.env.MYSQLUSER || 'root',
+    password: process.env.MYSQLPASSWORD || 'lolcrackk007',
+    database: process.env.MYSQLDATABASE || 'sidpol_ia_db',
+    port: process.env.MYSQLPORT || 3306,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+  }
+);
 
 const db = pool.promise();
 
+app.get('/', (req, res) => {
+  res.send('🚀 Backend de DenunciaSegura / SIDPOL está activo.');
+});
 // ==========================================
 // 📡 ENDPOINTS DEL CRUD TRANSACCIONAL
 // ==========================================
