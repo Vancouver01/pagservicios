@@ -159,78 +159,126 @@ app.delete('/api/denuncias/:id', async (req, res) => {
 });
 
 // ==========================================
-// 🌐 SERVIR EL FRONTEND COMPLETO
+// 🌐 CONFIGURACIÓN DEL FRONTEND (REACT)
 // ==========================================
-// Cualquier ruta que no sea de la API entregará la interfaz gráfica
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'build', 'index.html'));
-});
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 App completa (Frontend + Backend) corriendo en el puerto ${PORT}`);
-});
+// Ruta donde se encuentra el build de React
+const buildPath = path.resolve(process.cwd(), "frontend/build");
+
+// Servir archivos estáticos del frontend
+app.use(express.static(buildPath));
 
 // ==========================================
 // 🤖 ENDPOINT DE LA CAPA DE INTEGRACIÓN DE IA
 // ==========================================
+
 app.post('/api/ia/analizar', async (req, res) => {
   const { relato } = req.body;
-  
+
   if (!relato) {
-    return res.status(400).json({ error: 'El relato es obligatorio' });
+    return res.status(400).json({
+      error: 'El relato es obligatorio'
+    });
   }
 
   try {
+
     const responseSchema = {
       type: "object",
       properties: {
-        es_denuncia_valida: { 
-          type: "boolean", 
-          description: "true si contiene un relato de un hecho delictivo, sospechoso, fraude o emergencia. false si es solo un saludo o charla casual." 
+        es_denuncia_valida: {
+          type: "boolean",
+          description: "true si contiene un relato de un hecho delictivo, sospechoso, fraude o emergencia. false si es solo un saludo o charla casual."
         },
-        tipo: { type: "string", description: "Tipo de delito según el código penal peruano. Si es_denuncia_valida es false, poner 'Ninguno'." },
-        urgencia: { type: "string", description: "Gravedad (ALTA, MEDIA o BAJA). Si es_denuncia_valida es false, usar 'BAJA'." },
-        zona: { type: "string", description: "Nombre del distrito de Lima detectado en MAYÚSCULAS. Si es false, usar 'No especificado'." },
-        coincidencia: { type: "integer", description: "Porcentaje de confianza del 78 al 99. Si es false, usar 0." },
-        recomendacion: { type: "string", description: "Si es_denuncia_valida es true, da la recomendación u orden policial táctica detallada y empática de qué hacer. Si es false, saluda amablemente y pide que describa su caso." }
+        tipo: {
+          type: "string",
+          description: "Tipo de delito según el código penal peruano. Si es_denuncia_valida es false, poner 'Ninguno'."
+        },
+        urgencia: {
+          type: "string",
+          description: "Gravedad (ALTA, MEDIA o BAJA)."
+        },
+        zona: {
+          type: "string",
+          description: "Distrito detectado."
+        },
+        coincidencia: {
+          type: "integer",
+          description: "Porcentaje de confianza."
+        },
+        recomendacion: {
+          type: "string",
+          description: "Respuesta táctica para el ciudadano."
+        }
       },
-      required: ["es_denuncia_valida", "tipo", "urgencia", "zona", "coincidencia", "recomendacion"]
+      required: [
+        "es_denuncia_valida",
+        "tipo",
+        "urgencia",
+        "zona",
+        "coincidencia",
+        "recomendacion"
+      ]
     };
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: "gemini-2.5-flash",
       contents: `Analiza minuciosamente el siguiente texto del ciudadano peruano e infiere las variables estructurales: "${relato}"`,
       config: {
-        systemInstruction: `Eres un clasificador criminalístico experto adjunto al MININTER y un asistente de la PNP. 
-        Tu labor es analizar reportes en lenguaje natural. Si el usuario solo saluda (ej. 'hola', 'buenas', 'que tal'), pon es_denuncia_valida en false. 
-        Si describe un robo, asalto o fraude, pon es_denuncia_valida en true y realiza el triaje semántico estricto conforme a los campos del responseSchema.`,
+        systemInstruction: `Eres un clasificador criminalístico experto adjunto al MININTER y un asistente de la PNP.
+
+Tu labor es analizar reportes en lenguaje natural.
+
+Si el usuario solo saluda (ej. hola, buenas, qué tal), responde con es_denuncia_valida=false.
+
+Si describe un delito, clasifícalo y completa todos los campos.`,
+
         responseMimeType: "application/json",
-        responseSchema: responseSchema,
+        responseSchema
       }
     });
 
-    if (response && response.text) {
-      const resultadoIa = JSON.parse(response.text);
-      return res.json(resultadoIa);
-    } else {
-      throw new Error("La respuesta del modelo de IA vino vacía.");
+    if (!response || !response.text) {
+      throw new Error("La IA devolvió una respuesta vacía.");
     }
 
+    return res.json(JSON.parse(response.text));
+
   } catch (error) {
-    console.error('⚠️ [Backend Fallback Activado]:', error.message);
-    
+
+    console.error("⚠️ Error IA:", error);
+
     return res.json({
       es_denuncia_valida: false,
-      tipo: 'Ninguno',
-      urgencia: 'BAJA',
-      zona: 'No especificado',
+      tipo: "Ninguno",
+      urgencia: "BAJA",
+      zona: "No especificado",
       coincidencia: 0,
-      recomendacion: '¡Hola! Bienvenido a la Central Digital de Atención SIDPOL. Por favor, relátame a detalle los hechos de tu caso para iniciar tu triaje automatizado.'
+      recomendacion:
+        "¡Hola! Bienvenido a la Central Digital SIDPOL. Describe detalladamente tu caso para iniciar el análisis."
     });
+
   }
 });
 
-// CORRECCIÓN CRÍTICA DE BINDING PARA RAILWAY
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Servidor e interfaz escuchando en el puerto ${PORT}`);
+// ==========================================
+// 🌐 RUTA COMODÍN (REACT)
+// ==========================================
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(buildPath, "index.html"));
+});
+
+// ==========================================
+// 🚀 INICIAR SERVIDOR
+// ==========================================
+
+app.listen(PORT, "0.0.0.0", () => {
+
+  console.log("====================================");
+  console.log("🚀 DenunciaSegura iniciado");
+  console.log(`🌍 Puerto: ${PORT}`);
+  console.log(`📂 Build React: ${buildPath}`);
+  console.log("====================================");
+
 });

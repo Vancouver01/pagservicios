@@ -1,21 +1,10 @@
 {
-  "dependencies": {
-    "chart.js": "^4.5.1",
-    "framer-motion": "^12.40.0",
-    "leaflet": "^1.9.4",
-    "react-chartjs-2": "^5.3.1",
-    "react-icons": "^5.6.0",
-    "react-leaflet": "^4.2.1"
-  },
   "name": "denuncia-segura-app-main",
   "version": "1.0.0",
-  "description": "**DenunciaSegura** es una plataforma tecnológica omnicanal (WhatsApp + Web App) diseñada para transformar y automatizar el proceso de denuncias ciudadanas en el Perú. Mediante el uso de Inteligencia Artificial (NLP) y validación biométrica, el sistema reduce el tiempo de denuncia de 2 horas a menos de 15 minutos, eliminando la revictimización y garantizando el seguimiento automatizado.",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs"
+    "install-all": "npm install --prefix frontend && npm install --prefix backend-denuncia",
+    "build": "npm run build --prefix frontend",
+    "start": "node backend-denuncia/server.js"
+  }
 }
