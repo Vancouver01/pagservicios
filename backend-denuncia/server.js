@@ -169,28 +169,31 @@ app.post('/api/ia/analizar', async (req, res) => {
   }
 
   try {
-    const systemPrompt = `Eres un clasificador criminalístico experto adjunto al MININTER y un asistente de la PNP.
-Tu labor es analizar reportes en lenguaje natural.
-Si el usuario solo saluda (ej. hola, buenas, qué tal), responde estrictamente con un JSON donde "es_denuncia_valida" sea false.
-Si describe un delito, clasifícalo y completa todos los campos requeridos.
+    const systemPrompt = `Eres el suboficial virtual de atención y triaje de la Central Digital SIDPOL de la PNP (Perú). Tu tono es sumamente empático, profesional, cálido, dinámico y humano.
 
-DEBES RESPONDER EXCLUSIVAMENTE CON UN OBJETO JSON VÁLIDO (sin markdown adicional como \`\`\`json) que cumpla con este esquema exacto:
+Tu objetivo principal es conversar de forma fluida con el ciudadano que ha sufrido un incidente, calmarlo si es necesario, y extraer la información estructurada necesaria para el sistema.
+
+INSTRUCCIONES DE COMPORTAMIENTO:
+1. Si el usuario te saluda casualmente (ej: "hola", "buenas tardes"), respóndele con muchísima empatía, salúdalo cordialmente a nombre de la Central Digital SIDPOL y pídele amablemente que te relate detalladamente lo ocurrido, especificando el distrito y si los agresores portaban armas. En este caso, pon "es_denuncia_valida" en false.
+2. Si el ciudadano cuenta un asalto, robo o emergencia, valida su situación con empatía ("Lamento mucho lo que te pasó", "Qué bueno que estés a salvo dentro de lo cabe"), hazle sentir escuchado y dale una recomendación táctica y tranquilizadora.
+
+DEBES RESPONDER EXPLICITAMENTE Y ÚNICAMENTE CON UN OBJETO JSON VÁLIDO (sin markdown ni bloques de código adicionales como \`\`\`json) con esta estructura exacta:
 {
   "es_denuncia_valida": boolean,
-  "tipo": "string (Tipo de delito según el código penal peruano. Si es_denuncia_valida es false, poner 'Ninguno')",
+  "tipo": "string (Tipo de delito según el código penal peruano, o 'Ninguno' si es saludo)",
   "urgencia": "string (ALTA, MEDIA o BAJA)",
-  "zona": "string (Distrito detectado)",
+  "zona": "string (Distrito detectado o 'No especificado')",
   "coincidencia": integer (Porcentaje de confianza de 0 a 100),
-  "recomendacion": "string (Respuesta táctica para el ciudadano)"
+  "recomendacion": "string (Aquí va el mensaje conversacional, empático, dinámico y la orientación táctica redactada directamente para el ciudadano)"
 }`;
 
     const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile", // Modelo ultra potente y rápido de Groq
+      model: "llama-3.3-70b-versatile",
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: `Analiza minuciosamente el siguiente texto del ciudadano peruano e infiere las variables estructurales: "${relato}"` }
+        { role: "user", content: relato }
       ],
-      response_format: { type: "json_object" } // Fuerza a Groq a responder únicamente en JSON válido
+      response_format: { type: "json_object" }
     });
 
     const responseText = completion.choices[0]?.message?.content;
@@ -202,7 +205,7 @@ DEBES RESPONDER EXCLUSIVAMENTE CON UN OBJETO JSON VÁLIDO (sin markdown adiciona
     return res.json(JSON.parse(responseText));
 
   } catch (error) {
-    console.error("⚠️ Error IA (Groq):", error);
+    console.error("⚠️ Error IA (Groq Conversacional):", error);
 
     return res.json({
       es_denuncia_valida: false,
@@ -211,7 +214,7 @@ DEBES RESPONDER EXCLUSIVAMENTE CON UN OBJETO JSON VÁLIDO (sin markdown adiciona
       zona: "No especificado",
       coincidencia: 0,
       recomendacion:
-        "¡Hola! Bienvenido a la Central Digital SIDPOL. Describe detalladamente tu caso para iniciar el análisis."
+        "¡Hola! Bienvenido a la Central Digital SIDPOL. Comprendo por lo que puedes estar pasando. Por favor, relátame detalladamente qué ha sucedido, especificando el distrito y si los agresores portaban armas para ayudarte de inmediato."
     });
   }
 });
