@@ -209,7 +209,7 @@ app.post('/api/ia/analizar', async (req, res) => {
     };
 
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-lite",
+      model: "gemini-2.5-pro",
       contents: `Analiza minuciosamente el siguiente texto del ciudadano peruano e infiere las variables estructurales: "${relato}"`,
       config: {
         systemInstruction: `Eres un clasificador criminalístico experto adjunto al MININTER y un asistente de la PNP.
