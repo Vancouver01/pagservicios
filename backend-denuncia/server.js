@@ -3,7 +3,7 @@ import cors from 'cors';
 import 'dotenv/config';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { GoogleGenAI } from '@google/genai';
+import { Groq } from 'groq-sdk';
 // Importamos la conexión optimizada desde conexion.js
 import db from './conexion.js';
 const __filename = fileURLToPath(import.meta.url);
@@ -17,7 +17,7 @@ app.use(cors());
 app.use(express.json());
 
 // Inicialización de la API Core con soporte nativo de Google AI Studio
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 // ==========================================
 // 📡 ENDPOINTS DEL CRUD TRANSACCIONAL
@@ -169,71 +169,40 @@ app.post('/api/ia/analizar', async (req, res) => {
   }
 
   try {
-
-    const responseSchema = {
-      type: "object",
-      properties: {
-        es_denuncia_valida: {
-          type: "boolean",
-          description: "true si contiene un relato de un hecho delictivo, sospechoso, fraude o emergencia. false si es solo un saludo o charla casual."
-        },
-        tipo: {
-          type: "string",
-          description: "Tipo de delito según el código penal peruano. Si es_denuncia_valida es false, poner 'Ninguno'."
-        },
-        urgencia: {
-          type: "string",
-          description: "Gravedad (ALTA, MEDIA o BAJA)."
-        },
-        zona: {
-          type: "string",
-          description: "Distrito detectado."
-        },
-        coincidencia: {
-          type: "integer",
-          description: "Porcentaje de confianza."
-        },
-        recomendacion: {
-          type: "string",
-          description: "Respuesta táctica para el ciudadano."
-        }
-      },
-      required: [
-        "es_denuncia_valida",
-        "tipo",
-        "urgencia",
-        "zona",
-        "coincidencia",
-        "recomendacion"
-      ]
-    };
-
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-pro",
-      contents: `Analiza minuciosamente el siguiente texto del ciudadano peruano e infiere las variables estructurales: "${relato}"`,
-      config: {
-        systemInstruction: `Eres un clasificador criminalístico experto adjunto al MININTER y un asistente de la PNP.
-
+    const systemPrompt = `Eres un clasificador criminalístico experto adjunto al MININTER y un asistente de la PNP.
 Tu labor es analizar reportes en lenguaje natural.
+Si el usuario solo saluda (ej. hola, buenas, qué tal), responde estrictamente con un JSON donde "es_denuncia_valida" sea false.
+Si describe un delito, clasifícalo y completa todos los campos requeridos.
 
-Si el usuario solo saluda (ej. hola, buenas, qué tal), responde con es_denuncia_valida=false.
+DEBES RESPONDER EXCLUSIVAMENTE CON UN OBJETO JSON VÁLIDO (sin markdown adicional como \`\`\`json) que cumpla con este esquema exacto:
+{
+  "es_denuncia_valida": boolean,
+  "tipo": "string (Tipo de delito según el código penal peruano. Si es_denuncia_valida es false, poner 'Ninguno')",
+  "urgencia": "string (ALTA, MEDIA o BAJA)",
+  "zona": "string (Distrito detectado)",
+  "coincidencia": integer (Porcentaje de confianza de 0 a 100),
+  "recomendacion": "string (Respuesta táctica para el ciudadano)"
+}`;
 
-Si describe un delito, clasifícalo y completa todos los campos.`,
-
-        responseMimeType: "application/json",
-        responseSchema
-      }
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile", // Modelo ultra potente y rápido de Groq
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: `Analiza minuciosamente el siguiente texto del ciudadano peruano e infiere las variables estructurales: "${relato}"` }
+      ],
+      response_format: { type: "json_object" } // Fuerza a Groq a responder únicamente en JSON válido
     });
 
-    if (!response || !response.text) {
+    const responseText = completion.choices[0]?.message?.content;
+
+    if (!responseText) {
       throw new Error("La IA devolvió una respuesta vacía.");
     }
 
-    return res.json(JSON.parse(response.text));
+    return res.json(JSON.parse(responseText));
 
   } catch (error) {
-
-    console.error("⚠️ Error IA:", error);
+    console.error("⚠️ Error IA (Groq):", error);
 
     return res.json({
       es_denuncia_valida: false,
@@ -244,7 +213,6 @@ Si describe un delito, clasifícalo y completa todos los campos.`,
       recomendacion:
         "¡Hola! Bienvenido a la Central Digital SIDPOL. Describe detalladamente tu caso para iniciar el análisis."
     });
-
   }
 });
 const buildPath = path.resolve(process.cwd(), "frontend/build");
